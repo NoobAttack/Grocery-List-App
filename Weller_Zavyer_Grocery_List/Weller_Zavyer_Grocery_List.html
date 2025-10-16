@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Grocery List</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+		/>
+		<style>
+			.app-wrapper {
+				max-width: 720px;
+				margin: 48px auto;
+			}
+			.item-qty {
+				font-weight: 600;
+				margin-left: 0.75rem;
+			}
+		</style>
+	</head>
+	<body>
+		<section class="section">
+			<div class="container app-wrapper" id="app">
+				<h1 class="title has-text-centered">Grocery List</h1>
+
+				<div class="box">
+					<div class="field is-horizontal">
+						<div class="field-body">
+							<div class="field">
+								<label class="label">Grocery Item</label>
+								<div class="control">
+									<input
+										class="input"
+										type="text"
+										placeholder="e.g. Bread"
+										v-model="newItem"
+										@keyup.enter="addItem"
+									/>
+								</div>
+							</div>
+
+							<div class="field" style="max-width: 150px">
+								<label class="label">Quantity</label>
+								<div class="control">
+									<input
+										class="input"
+										type="number"
+										min="1"
+										v-model.number="newQty"
+										@keyup.enter="addItem"
+									/>
+								</div>
+							</div>
+
+							<div class="field" style="align-self: flex-end">
+								<div class="control">
+									<button class="button is-primary" @click="addItem">
+										Add
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="box" v-if="items.length">
+					<h2 class="subtitle">Items ({{ items.length }})</h2>
+					<ul>
+						<!-- Render each item; `v-for` provides the item and its index -->
+						<li v-for="(it, idx) in items" :key="it.id" class="level">
+							<div class="level-left">
+								<div class="level-item">
+									<!-- Item name -->
+									<strong>{{ it.name }}</strong>
+									<!-- Quantity tag -->
+									<span class="tag is-light item-qty">x {{ it.qty }}</span>
+								</div>
+							</div>
+							<div class="level-right">
+								<div class="level-item">
+									<!-- Delete button removes the item -->
+									<button
+										class="button is-danger is-light"
+										@click="removeItem(idx)"
+									>
+										Delete
+									</button>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+
+				<!-- Small footer note about libraries used -->
+				<div class="content has-text-right">
+					<small class="is-size-7"
+						><u>This app uses Bulma for styling and Vue 3 via CDN.</u></small
+					>
+				</div>
+			</div>
+		</section>
+
+		<!-- Vue 3 CDN -->
+		<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+		<script>
+			/*  Composition API (setup function) */
+			const { createApp, ref } = Vue;
+
+			createApp({
+				setup() {
+					// Reactive state for inputs and the items array
+					const newItem = ref(''); //  item text input
+					const newQty = ref(1); //  number input (quantity)
+					const items = ref([]); // the list of added grocery items
+
+					/*
+					 * addItem()
+					 * - reads the inputs, validates them, and adds a new item into `items`.
+					 * - resets inputs after a successful add.
+					 */
+					function addItem() {
+						const name = (newItem.value || '').trim();
+						const qty = Number(newQty.value) || 0;
+						// Basic validation
+						if (!name) return; // ignore empty names
+						if (!Number.isFinite(qty) || qty < 1) return; // require qty >= 1
+
+						// adds items
+						items.value.push({ name, qty });
+
+						// Reset the inputs for the next entry
+						newItem.value = '';
+						newQty.value = 1;
+					}
+
+					// removeItem(index) removes the item
+					function removeItem(index) {
+						items.value.splice(index, 1);
+					}
+
+					// dispalys everything
+					return { newItem, newQty, items, addItem, removeItem };
+				},
+			}).mount('#app');
+		</script>
+	</body>
+</html>
